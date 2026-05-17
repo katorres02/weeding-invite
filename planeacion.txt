@@ -1,0 +1,385 @@
+PROJECT: Wedding Invitation Website
+CREATED: 2026-05-17
+AUTHOR: Carlos Torres
+STACK: Vanilla HTML + CSS + JS (no framework, no build tools)
+DEPLOYMENT: Static — drag-and-drop to Netlify / Vercel / GitHub Pages
+
+
+================================================================================
+SECTION 1: DESIGN TOKENS
+================================================================================
+
+COLOR_PALETTE:
+  --color-bg:        #FAF7F2   // warm ivory — body background
+  --color-gold:      #C9A96E   // champagne gold — borders, accents, CTA buttons
+  --color-text:      #3D3530   // dark warm brown — all body copy
+  --color-blush:     #E8D5C4   // blush — section backgrounds, card fills
+  --color-envelope:  #D4B896   // aged parchment — envelope fill
+  --color-seal:      #8B1A1A   // deep burgundy — wax seal
+  --color-overlay:   rgba(20,15,10,0.85)  // dark overlay behind envelope
+
+TYPOGRAPHY:
+  --font-serif:   'Cormorant Garamond', Georgia, serif   // headings, couple names
+  --font-sans:    'Montserrat', system-ui, sans-serif     // body, labels, captions
+  NOTE: Load from Google Fonts CDN with &display=swap
+
+FONT_SCALE:
+  h1 (couple names):   clamp(3rem, 8vw, 7rem),  font-weight: 300, letter-spacing: 0.04em
+  h2 (section titles): clamp(1.8rem, 4vw, 3rem), font-weight: 400
+  body:                1.125rem, line-height: 1.8
+
+SPACING_SCALE:
+  --space-xs:   0.5rem
+  --space-sm:   1rem
+  --space-md:   1.5rem
+  --space-lg:   2.5rem
+  --space-xl:   4rem
+  --space-2xl:  6rem
+
+
+================================================================================
+SECTION 2: EXTERNAL DEPENDENCIES (CDN — no npm required)
+================================================================================
+
+LOAD ORDER IN <head>:
+  1. Google Fonts preconnect + stylesheet
+     URL: https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Montserrat:wght@300;400;500&display=swap
+  2. AOS CSS
+     URL: https://unpkg.com/aos@2.3.4/dist/aos.css
+
+LOAD ORDER AT END OF <body>:
+  3. GSAP 3 core
+     URL: https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js
+  4. AOS JS
+     URL: https://unpkg.com/aos@2.3.4/dist/aos.js
+  5. /js/countdown.js
+  6. /js/envelope.js
+  7. /js/main.js
+
+
+================================================================================
+SECTION 3: FILE STRUCTURE
+================================================================================
+
+/weeding-invite
+  index.html              // single page — all sections
+  planeacion.txt          // this file
+  /css
+    styles.css            // design tokens, reset, typography, all section styles
+    envelope.css          // envelope overlay, SVG 3D flap, wax seal pulse
+    animations.css        // AOS overrides, hero entrance, countdown flip, gallery hover
+  /js
+    countdown.js          // self-contained countdown timer module
+    envelope.js           // GSAP envelope open animation sequence
+    main.js               // AOS init, gallery lightbox, smooth scroll, orchestration
+  /assets
+    /images               // photo files go here (see SECTION 6 for filenames)
+    /fonts                // empty — reserved if self-hosting fonts later
+
+FILE DEPENDENCY ORDER (build in this sequence):
+  1. index.html        — defines all HTML ids and classes
+  2. css/styles.css    — references class/id names from index.html
+  3. css/envelope.css  — references envelope SVG element ids
+  4. css/animations.css — references JS-added classes and AOS attributes
+  5. js/countdown.js   — references #cd-days, #cd-hours, #cd-minutes, #cd-seconds
+  6. js/envelope.js    — references SVG ids, requires GSAP loaded first
+  7. js/main.js        — references all above modules and DOM elements
+
+
+================================================================================
+SECTION 4: PAGE SECTIONS & HTML STRUCTURE
+================================================================================
+
+-- ENVELOPE SCREEN (shown on load, z-index: 9999) --
+  id: envelope-screen
+  role: dialog
+  aria-label: "Abrir invitación"
+  Contains:
+    - div.envelope-wrapper (perspective: 1000px, perspective-origin: 50% 0%)
+      - svg#envelope-svg (viewBox="0 0 400 280", width: min(400px, 90vw))
+          - rect#envelope-back      (back panel, fill: --color-envelope)
+          - polygon#envelope-bottom (bottom fold triangle, points="0,280 400,280 200,140")
+          - polygon#envelope-left   (left fold,   points="0,0 0,280 200,140")
+          - polygon#envelope-right  (right fold,  points="400,0 400,280 200,140")
+          - polygon#envelope-flap   (top flap,    points="0,0 400,0 200,140", ANIMATED)
+          - g#wax-seal              (circle cx=200 cy=105 r=32 + monogram text, CLICKABLE)
+      - div#letter-card             (absolutely positioned over envelope, rises during animation)
+    - p#seal-hint                   (hint text: "Toca el sello para abrir", aria-hidden="true")
+
+-- MAIN INVITATION (hidden until envelope opens) --
+  id: invitation
+  tag: <main>
+  Initial state: opacity:0, pointer-events:none
+  Activated by: envelope.js onComplete callback
+
+  SECTIONS (in order):
+  1. #hero            — couple names (h1.couple-names) + wedding date (p.wedding-date) + SVG flourish
+  2. #countdown-section — countdown timer (4 units: days/hours/minutes/seconds), role="timer"
+  3. #our-story       — h2 + story paragraph + optional 2 portrait photos
+  4. #event-details   — h2 + .details-grid (2 cards: date/time + venue) + Google Maps iframe
+  5. #gallery         — h2 + .gallery-grid (5 figures) + #lightbox overlay
+  6. #dress-code      — h2 + dress label + description + optional color swatches
+  7. #gift-registry   — h2 + instructions + CTA link to gift registry
+  8. #rsvp            — h2 + message + CTA link to Google Form
+  <footer>            — couple names + date
+
+
+================================================================================
+SECTION 5: ANIMATION SPECIFICATIONS
+================================================================================
+
+-- WAX SEAL (idle, before click) --
+  CSS keyframe: sealPulse
+  Behavior: scale 1→1.06→1, drop-shadow pulse (burgundy glow)
+  Duration: 2.5s, ease-in-out, infinite
+  CSS property: transform-box: fill-box (required for SVG elements)
+
+-- ENVELOPE OPEN (GSAP timeline, triggered on #wax-seal click) --
+  Prerequisites:
+    gsap.set('#envelope-flap', { svgOrigin: "200 0" })  // set before timeline
+    gsap.set('#envelope-back', { svgOrigin: "200 140" }) // center of envelope
+
+  Timeline steps:
+    t=0.0s: Disable #wax-seal pointer-events, add class 'clicked' (stops pulse animation)
+    t=0.0–0.4s: Tween #wax-seal: scale→0, opacity→0, ease:"power2.in"
+    t=0.2–0.8s: Tween #envelope-flap: rotateX→-180deg, ease:"power2.inOut"
+                NOTE: rotateX negative = opens toward viewer
+    t=0.6–1.2s: Tween #letter-card: y 40→-60 (relative), opacity 0→1, ease:"power1.out"
+    t=1.0–1.8s: Tween #envelope-screen: opacity→0, ease:"power2.inOut"
+                onComplete:
+                  document.getElementById('envelope-screen').classList.add('hidden')
+                  const inv = document.getElementById('invitation')
+                  inv.style.opacity = '1'
+                  inv.style.pointerEvents = 'auto'
+                  // trigger hero animations
+                  document.querySelectorAll('.hero-animate').forEach(el => el.style.animationPlayState = 'running')
+                  AOS.refresh()
+
+  REDUCED MOTION: Check prefers-reduced-motion. If true, skip GSAP and show invitation immediately.
+  Implementation: if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { skipEnvelope() }
+
+-- HERO ENTRANCE (after envelope fade) --
+  CSS keyframe: heroReveal
+  From: opacity:0, translateY(24px), letter-spacing wider
+  To:   opacity:1, translateY(0), letter-spacing normal
+  Duration: 1.2s, cubic-bezier(0.16, 1, 0.3, 1)
+  Applied via .hero-animate class, with .delay-1 and .delay-2 variants
+
+-- SCROLL ANIMATIONS (AOS) --
+  Init: AOS.init({ duration: 900, once: true, offset: 80, easing: 'ease-out-cubic' })
+  All sections use: data-aos="fade-up"
+  Cards use staggered delay: data-aos-delay="100", "200", "300"
+
+-- COUNTDOWN DIGIT CHANGE --
+  CSS keyframe: digitFlip
+  From: translateY(-20%), opacity:0
+  To:   translateY(0), opacity:1
+  Duration: 0.3s ease-out
+  Triggered: JS adds .cd-flip class on each unit when value changes, removes after 350ms
+
+-- GALLERY HOVER --
+  CSS: figure:hover img { transform: scale(1.04) }
+  Transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1)
+  Overflow: hidden on figure
+
+-- LIGHTBOX --
+  Show: #lightbox[hidden] removed, keyframe lightboxIn (scale 0.92→1, opacity 0→1, 0.35s)
+  Hide: add [hidden] attribute
+  Close triggers: #lb-close click, Escape key, click outside image
+  Navigation: #lb-prev / #lb-next, ArrowLeft / ArrowRight keys
+  Focus: trap focus inside lightbox when open
+
+
+================================================================================
+SECTION 6: PLACEHOLDER VALUES TO FILL IN
+================================================================================
+
+REQUIRED BEFORE LAUNCH (replace these strings in index.html):
+
+  COUPLE_NAME_1          → Full name of partner 1
+  COUPLE_NAME_2          → Full name of partner 2
+  WEDDING_DATE_DISPLAY   → e.g. "Sábado, 14 de Febrero de 2026"
+  WEDDING_DATE_ISO       → e.g. "2026-02-14T17:00:00" (used in countdown.js)
+  WEDDING_TIME           → e.g. "17:00 hrs"
+  VENUE_NAME             → Name of wedding venue
+  VENUE_ADDRESS          → Full address string
+  VENUE_MAPS_EMBED_URL   → Google Maps embed URL (see instructions below)
+  GOOGLE_FORM_URL        → RSVP Google Form URL (see instructions below)
+  GIFT_REGISTRY_URL      → Link to gift registry (Amazon, Liverpool, etc.)
+  DRESS_CODE_LABEL       → e.g. "Formal" / "Cocktail" / "Etiqueta Rigurosa"
+  DRESS_CODE_DESCRIPTION → Guidance paragraph (2-3 sentences)
+  STORY_TEXT             → "Our story" paragraph (3-5 sentences)
+  RSVP_DEADLINE          → e.g. "Confirma antes del 1 de Febrero de 2026"
+  WAX_SEAL_MONOGRAM      → 1-2 initials for the wax seal SVG (e.g. "CT")
+
+PHOTO FILES (place in /assets/images/):
+  photo-1.jpg  → main couple photo (spans 2 grid columns)
+  photo-2.jpg  → couple photo 2
+  photo-3.jpg  → couple photo 3
+  photo-4.jpg  → couple photo 4
+  photo-5.jpg  → couple photo 5
+  Recommended: 1200x800px minimum, JPG format, <500KB each
+
+GOOGLE MAPS EMBED URL (how to get it):
+  1. Go to maps.google.com
+  2. Search for venue address
+  3. Click Share → Embed a map → Copy HTML
+  4. Extract the src="..." URL from the iframe tag
+  5. Paste as VENUE_MAPS_EMBED_URL
+
+GOOGLE FORM RSVP SETUP (how to get URL):
+  1. Go to forms.google.com, create new form
+  2. Suggested fields: Nombre completo, Número de asistentes, ¿Asistirás? (Sí/No), Restricciones alimentarias, Mensaje para los novios
+  3. Connect to Google Sheets: Responses tab → Link to Sheets
+  4. Click Send button in Forms → Link icon → Copy URL
+  5. Paste as GOOGLE_FORM_URL in index.html
+
+
+================================================================================
+SECTION 7: COMPONENT DETAILS
+================================================================================
+
+-- ENVELOPE SVG CONSTRUCTION --
+viewBox: "0 0 400 280"
+Elements (bottom-to-top z-order in SVG):
+  rect#envelope-back:     x=0 y=0 w=400 h=280,    fill: #D4B896
+  polygon#envelope-bottom: "0,280 400,280 200,140", fill: #C4A886 (slightly darker)
+  polygon#envelope-left:   "0,0 0,280 200,140",    fill: #CEB090
+  polygon#envelope-right:  "400,0 400,280 200,140", fill: #CEB090
+  polygon#envelope-flap:   "0,0 400,0 200,140",    fill: #DBBF9E (lighter), GSAP animated
+  g#wax-seal:
+    circle: cx=200 cy=105 r=32,  fill: #8B1A1A, stroke: #6B1212 stroke-width=1.5
+    circle: cx=200 cy=105 r=26,  fill: none,    stroke: rgba(255,255,255,0.2) stroke-width=1
+    text:   x=200 y=111, font-family=serif, font-size=18, fill=#F5E6D3, text-anchor=middle → monogram
+  TRANSPARENT HIT AREA (ensure 44px minimum tap target):
+    circle: cx=200 cy=105 r=44, fill=transparent, pointer-events=all, cursor=pointer
+
+-- DETAILS CARDS --
+CSS: .details-grid display:grid, grid-template-columns:repeat(auto-fit,minmax(280px,1fr)), gap:2.5rem
+Each .detail-card: background #FAF7F2, border:1px solid var(--color-gold),
+                   padding:2rem, text-align:center, border-radius:2px
+
+-- CTA BUTTON --
+.cta-button:
+  display: inline-block
+  padding: 1rem 3rem
+  border: 1.5px solid var(--color-gold)
+  color: var(--color-text)
+  font-family: var(--font-sans)
+  font-size: 0.8125rem
+  letter-spacing: 0.15em
+  text-transform: uppercase
+  text-decoration: none
+  background: transparent
+  transition: background 0.3s ease, color 0.3s ease
+  cursor: pointer
+.cta-button:hover:
+  background: var(--color-gold)
+  color: var(--color-bg)
+
+.cta-primary (RSVP button):
+  Same as .cta-button but background starts as var(--color-gold), color: var(--color-bg)
+  Hover: background: #B8935A (darker gold), color: var(--color-bg)
+
+-- GALLERY GRID --
+CSS: display:grid, grid-template-columns:repeat(3,1fr), gap:0.75rem
+figure:first-child: grid-column: span 2  (anchor photo, wider)
+Responsive:
+  @media (max-width: 640px): grid-template-columns: repeat(2,1fr)
+  @media (max-width: 400px): grid-template-columns: 1fr
+  NOTE: Remove grid-column:span 2 on mobile to avoid layout issues
+
+-- LIGHTBOX --
+HTML: div#lightbox, role=dialog, aria-modal=true, initially [hidden]
+Layout: position:fixed, inset:0, background:rgba(0,0,0,0.92), display:flex, align-items:center
+        justify-content:center, z-index:10000
+img#lb-img: max-width:90vw, max-height:85vh, object-fit:contain
+Buttons: #lb-close (top-right), #lb-prev (left), #lb-next (right)
+JS: maintain currentIndex, images array from .gallery-grid figure[data-full] attributes
+
+-- COUNTDOWN TIMER --
+Target element: #countdown
+  Child divs: .countdown-unit each containing:
+    span#cd-days / #cd-hours / #cd-minutes / #cd-seconds
+    label text
+Logic in js/countdown.js:
+  const WEDDING_DATE = new Date('WEDDING_DATE_ISO')
+  setInterval updates every 1000ms
+  On digit change: add .cd-flip to span, setTimeout remove after 350ms
+  Edge case: if countdown <= 0, display "¡Hoy es el gran día!" and clearInterval
+
+
+================================================================================
+SECTION 8: RESPONSIVE BREAKPOINTS
+================================================================================
+
+Mobile-first approach. Breakpoints:
+
+  Base (0–400px):   single column layout, envelope SVG 90vw, gallery 1 column
+  Small (401–640px): gallery 2 columns, map height 250px
+  Medium (641–900px): details grid 2 columns
+  Large (901px+):   max-width 900px centered, gallery 3 columns, full layout
+
+
+================================================================================
+SECTION 9: ACCESSIBILITY REQUIREMENTS
+================================================================================
+
+  - #envelope-screen: role="dialog", aria-label="Abrir invitación"
+  - #invitation:      aria-hidden="true" while envelope is showing, swap on open
+  - #countdown:       role="timer", aria-live="polite"
+  - All decorative SVGs and ornaments: aria-hidden="true"
+  - Gallery lightbox: role="dialog", aria-modal="true", focus trapped while open
+  - #lb-close, #lb-prev, #lb-next: aria-label attributes set
+  - All <a> elements: descriptive aria-label if text alone is not clear
+  - prefers-reduced-motion: if true, skip all GSAP animations, show invitation directly
+
+
+================================================================================
+SECTION 10: KNOWN TODOS & OPEN QUESTIONS
+================================================================================
+
+TODO_REQUIRED:
+  [ ] Replace all PLACEHOLDER values in SECTION 6 above
+  [ ] Add 5 couple photos to /assets/images/ (naming: photo-1.jpg through photo-5.jpg)
+  [ ] Create Google Form and copy URL to GOOGLE_FORM_URL placeholder
+  [ ] Get Google Maps embed URL for venue
+  [ ] Add gift registry URL
+
+TODO_OPTIONAL:
+  [ ] Add background music (use play button — autoplay blocked by browsers)
+  [ ] Add "Save the date" downloadable image section
+  [ ] Add Instagram/social hashtag section
+  [ ] Add FAQ section (parking, hotels, etc.)
+  [ ] Custom domain on Netlify
+  [ ] Add OG meta tags for WhatsApp/social link previews
+  [ ] Add favicon with monogram initials
+
+OPEN_QUESTIONS:
+  - Dress code type? (Formal / Cocktail / Etiqueta rigurosa / Casual elegante)
+  - Gift registry platform? (Amazon, Liverpool, El Palacio de Hierro, cash/transfer?)
+  - Should the envelope have a sound effect when opening?
+  - Preferred language? Plan assumes Spanish. Bilingual needs section duplication.
+
+
+================================================================================
+SECTION 11: DEPLOYMENT INSTRUCTIONS
+================================================================================
+
+OPTION A — Netlify (recommended, free):
+  1. Go to netlify.com → "Add new site" → "Deploy manually"
+  2. Drag the /weeding-invite folder into the deploy drop zone
+  3. Site goes live instantly at a *.netlify.app URL
+  4. Optional: set custom domain in Site settings → Domain management
+
+OPTION B — GitHub Pages (free):
+  1. Push contents to GitHub repo
+  2. Settings → Pages → Source: main branch, / (root)
+  3. Site live at https://USERNAME.github.io/REPO-NAME
+
+NOTE: No server-side code, no build step required. 100% static HTML/CSS/JS.
+
+
+================================================================================
+END OF PLAN
+================================================================================
