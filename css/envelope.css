@@ -1,0 +1,141 @@
+/* ============================================================
+   ENVELOPE SCREEN
+   ============================================================ */
+#envelope-screen {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 15, 10, 0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.6s ease;
+}
+
+#envelope-screen.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ============================================================
+   ENVELOPE WRAPPER — enables 3D perspective
+   ============================================================ */
+.envelope-wrapper {
+  position: relative;
+  perspective: 1200px;
+  perspective-origin: 50% 30%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ============================================================
+   SVG ENVELOPE
+   ============================================================ */
+#envelope-svg {
+  width: min(420px, 88vw);
+  height: auto;
+  filter: drop-shadow(0 24px 60px rgba(0, 0, 0, 0.55))
+          drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+  display: block;
+}
+
+/* SVG transform-box fix — makes transform-origin relative to element bounds */
+#envelope-flap {
+  transform-box: fill-box;
+  transform-origin: top center;
+}
+
+/* ============================================================
+   WAX SEAL
+   ============================================================ */
+#wax-seal {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: sealPulse 2.8s ease-in-out infinite;
+}
+
+#wax-seal.clicked {
+  animation: none;
+  pointer-events: none;
+}
+
+@keyframes sealPulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 6px rgba(139, 26, 26, 0.4));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 18px rgba(139, 26, 26, 0.75));
+    transform: scale(1.07);
+  }
+}
+
+/* ============================================================
+   LETTER CARD — rises from envelope during animation
+   ============================================================ */
+#letter-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) translateY(40px);
+  width: min(300px, 72vw);
+  background: linear-gradient(135deg, #FEFCF8 0%, #FAF5EC 100%);
+  border: 1px solid rgba(201, 169, 110, 0.25);
+  padding: 2rem 2.5rem;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  z-index: 10;
+}
+
+.letter-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.letter-ornament {
+  color: #C9A96E;
+  font-size: 1rem;
+  letter-spacing: 0.3em;
+}
+
+.letter-content p {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: 1.05rem;
+  color: #3D3530;
+  line-height: 1.6;
+  letter-spacing: 0.03em;
+}
+
+/* ============================================================
+   SEAL HINT TEXT
+   ============================================================ */
+#seal-hint {
+  margin-top: 2rem;
+  font-family: 'Montserrat', system-ui, sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(250, 247, 242, 0.45);
+  font-weight: 300;
+  animation: hintBreath 3s ease-in-out infinite;
+}
+
+@keyframes hintBreath {
+  0%, 100% { opacity: 0.35; }
+  50%       { opacity: 0.75; }
+}
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  #wax-seal { animation: none; }
+  #seal-hint { animation: none; opacity: 0.6; }
+}

@@ -1,0 +1,108 @@
+/* ============================================================
+   AOS OVERRIDES
+   ============================================================ */
+[data-aos] {
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* ============================================================
+   HERO ENTRANCE — triggered after envelope fades
+   ============================================================ */
+.hero-animate {
+  opacity: 0;
+  animation-name: heroReveal;
+  animation-duration: 1.2s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: both;
+  animation-play-state: paused;
+}
+
+.hero-animate.delay-1 { animation-delay: 0.1s; }
+.hero-animate.delay-2 { animation-delay: 0.3s; }
+.hero-animate.delay-3 { animation-delay: 0.55s; }
+.hero-animate.delay-4 { animation-delay: 0.75s; }
+
+@keyframes heroReveal {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================
+   COUNTDOWN DIGIT FLIP
+   ============================================================ */
+@keyframes digitFlip {
+  from {
+    opacity: 0;
+    transform: translateY(-25%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cd-flip {
+  animation: digitFlip 0.3s ease-out both;
+}
+
+/* ============================================================
+   LIGHTBOX ENTRANCE
+   ============================================================ */
+@keyframes lightboxIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+#lightbox:not([hidden]) #lb-img {
+  animation: lightboxIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ============================================================
+   DETAIL CARDS HOVER
+   ============================================================ */
+.detail-card {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.4s ease;
+}
+
+.detail-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(61, 53, 48, 0.08);
+}
+
+/* ============================================================
+   REDUCED MOTION OVERRIDES
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .hero-animate {
+    animation: none;
+    opacity: 1;
+  }
+
+  [data-aos] {
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .detail-card {
+    transition: none;
+  }
+
+  .detail-card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
