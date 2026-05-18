@@ -2,7 +2,7 @@
   'use strict';
 
   // Update this to the wedding date/time in ISO 8601 format
-  const WEDDING_DATE = new Date('WEDDING_DATE_ISO');
+  const WEDDING_DATE = new Date('2026-07-18T17:00:00-04:00');
 
   const els = {
     days:    document.getElementById('cd-days'),
