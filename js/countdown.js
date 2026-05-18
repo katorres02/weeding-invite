@@ -32,8 +32,11 @@
     if (delta <= 0) {
       const section = document.getElementById('countdown-section');
       if (section) {
+        var msg = (typeof window.getTranslation === 'function')
+          ? window.getTranslation('countdown.today')
+          : '¡Hoy es el gran día!';
         section.querySelector('.section-inner').innerHTML =
-          '<h2 style="color: var(--color-gold)">¡Hoy es el gran día!</h2>';
+          '<h2 style="color: var(--color-gold)">' + msg + '</h2>';
       }
       clearInterval(timer);
       return;

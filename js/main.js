@@ -3,6 +3,11 @@
 
   document.addEventListener('DOMContentLoaded', function () {
 
+    // ── i18n (must run first — sets all text content) ────────
+    if (typeof window.initI18n === 'function') {
+      window.initI18n();
+    }
+
     // ── AOS (scroll animations) ──────────────────────────────
     AOS.init({
       duration: 900,
