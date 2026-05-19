@@ -31,134 +31,32 @@
        aria-label="Abrir invitación"
        aria-modal="true">
     <div class="envelope-wrapper">
-      <svg id="envelope-svg" viewBox="0 0 400 280" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <defs>
-          <!-- Paper texture: directional fiber noise -->
-          <filter id="paper-texture" x="0%" y="0%" width="100%" height="100%" color-interpolation-filters="sRGB">
-            <feTurbulence type="fractalNoise" baseFrequency="0.65 0.18" numOctaves="4" seed="5" stitchTiles="stitch" result="fibers"/>
-            <feTurbulence type="fractalNoise" baseFrequency="0.9 0.9" numOctaves="2" seed="11" stitchTiles="stitch" result="grain"/>
-            <feBlend in="fibers" in2="grain" mode="screen" result="combined"/>
-            <feColorMatrix type="matrix"
-              values="1    0    0    0    0.02
-                      0    0.95 0    0    0.02
-                      0    0    0.88 0    0
-                      0    0    0    0.18 0"
-              in="combined" result="warmNoise"/>
-            <feBlend in="SourceGraphic" in2="warmNoise" mode="soft-light" result="textured"/>
-            <feComposite in="textured" in2="SourceGraphic" operator="in"/>
-          </filter>
-
-          <!-- Edge shadow vignette (green tint) -->
-          <radialGradient id="edge-age" cx="50%" cy="50%" r="70%">
-            <stop offset="0%"   stop-color="#1C2B1C" stop-opacity="0"/>
-            <stop offset="100%" stop-color="#1C2B1C" stop-opacity="0.14"/>
-          </radialGradient>
-
-          <!-- Gold seal gradient: top-left highlight → rich gold → dark gold -->
-          <radialGradient id="seal-gold" cx="38%" cy="32%" r="65%">
-            <stop offset="0%"   stop-color="#E2C060"/>
-            <stop offset="55%"  stop-color="#B8962E"/>
-            <stop offset="100%" stop-color="#7A6018"/>
-          </radialGradient>
-
-          <!-- Clip to flap triangle (for interior image) -->
-          <clipPath id="clip-flap-interior">
-            <polygon points="0,0 400,0 200,140"/>
-          </clipPath>
-        </defs>
-
-        <!-- ── BODY (SVG fallback: ivory) ──────────────────────── -->
-        <rect id="envelope-back" x="0" y="0" width="400" height="280"
-              fill="#F0EDE4" rx="2" filter="url(#paper-texture)"/>
-        <!--
-          CUSTOM IMAGE: drop your envelope photo at assets/images/envelope-body.jpg
-          It will automatically appear on top of the SVG fallback above.
-        -->
-        <image id="envelope-body-img" href="assets/images/envelope-body.jpg"
-               x="0" y="0" width="400" height="280"
-               preserveAspectRatio="xMidYMid slice"
-               onerror="this.style.display='none'"/>
-        <!-- Edge vignette -->
-        <rect x="0" y="0" width="400" height="280"
-              fill="url(#edge-age)" rx="2" pointer-events="none"/>
-
-        <!-- ── INTERIOR (revealed when flap opens) ─────────────── -->
-        <!-- Fallback: dark forest green -->
-        <polygon points="0,0 400,0 200,140" fill="#1C2B1C" opacity="0.88"/>
-        <!--
-          CUSTOM IMAGE: drop a floral photo at assets/images/envelope-interior.jpg
-          It clips to the triangular flap area and is revealed as the flap opens.
-        -->
-        <image id="envelope-interior-img" href="assets/images/envelope-interior.jpg"
-               x="0" y="0" width="400" height="280"
-               clip-path="url(#clip-flap-interior)"
-               preserveAspectRatio="xMidYMid slice"
-               onerror="this.style.display='none'"/>
-
-        <!-- ── FOLDS (slightly shaded ivory) ───────────────────── -->
-        <polygon id="envelope-bottom" points="0,280 400,280 200,140"
-                 fill="#E5E2D8" filter="url(#paper-texture)"/>
-        <polygon id="envelope-left"   points="0,0 0,280 200,140"
-                 fill="#ECEADF" filter="url(#paper-texture)"/>
-        <polygon id="envelope-right"  points="400,0 400,280 200,140"
-                 fill="#ECEADF" filter="url(#paper-texture)"/>
-
-        <!-- ── FLAP (animated by GSAP rotateX) ─────────────────── -->
-        <polygon id="envelope-flap" points="0,0 400,0 200,140"
-                 fill="#F0EDE4" filter="url(#paper-texture)"/>
-        <!-- Crease lines -->
-        <line x1="0"   y1="0" x2="200" y2="140" stroke="rgba(28,43,28,0.07)" stroke-width="1"/>
-        <line x1="400" y1="0" x2="200" y2="140" stroke="rgba(28,43,28,0.07)" stroke-width="1"/>
-        <!-- Thin gold frame border -->
-        <rect x="3" y="3" width="394" height="274" fill="none"
-              stroke="rgba(184,150,46,0.3)" stroke-width="1" rx="2"/>
-
-        <!-- ── WAX SEAL (gold) ──────────────────────────────── -->
-        <g id="wax-seal"
-           role="button"
-           tabindex="0"
-           data-i18n-aria="aria.seal"
-           aria-label="Toca para abrir la invitación">
-          <!-- Hit area (44px min tap target) -->
-          <circle cx="200" cy="105" r="44" fill="transparent" pointer-events="all" style="cursor:pointer"/>
-          <!-- Seal body: gold radial gradient -->
-          <circle cx="200" cy="105" r="34" fill="url(#seal-gold)"/>
-          <!-- Outer ring -->
-          <circle cx="200" cy="105" r="34" fill="none" stroke="rgba(255,240,160,0.35)" stroke-width="1.5"/>
-          <!-- Inner decorative ring -->
-          <circle cx="200" cy="105" r="27" fill="none" stroke="rgba(255,240,160,0.4)" stroke-width="1"/>
-          <!-- Gold highlight (top-left) -->
-          <ellipse cx="189" cy="94" rx="9" ry="5.5"
-                   fill="rgba(255,248,200,0.22)" transform="rotate(-30 189 94)"/>
-          <!-- Monogram -->
-          <text x="200" y="112" font-family="Cormorant Garamond, Georgia, serif"
-                font-size="19" font-weight="400" fill="#FFF8E0"
-                text-anchor="middle" letter-spacing="3">C·C</text>
-          <!-- Decorative dots -->
-          <circle cx="200" cy="72"  r="2" fill="rgba(255,240,160,0.6)"/>
-          <circle cx="200" cy="138" r="2" fill="rgba(255,240,160,0.6)"/>
-          <circle cx="167" cy="105" r="2" fill="rgba(255,240,160,0.6)"/>
-          <circle cx="233" cy="105" r="2" fill="rgba(255,240,160,0.6)"/>
-          <!--
-            CUSTOM SEAL IMAGE: drop your wax seal PNG at assets/images/wax-seal.png
-            A circular PNG with transparency works best (88×88px recommended).
-          -->
-          <image id="wax-seal-img" href="assets/images/wax-seal.png"
-                 x="156" y="61" width="88" height="88"
-                 preserveAspectRatio="xMidYMid meet"
-                 onerror="this.style.display='none'"/>
-        </g>
-      </svg>
-
-      <!-- Letter card rises during animation -->
-      <div id="letter-card" aria-hidden="true">
-        <div class="letter-content">
-          <span class="letter-ornament">✦</span>
-          <p data-i18n="letter.text">Tenemos el honor de invitarte</p>
+      <div id="envelope-container">
+        <!-- Closed envelope (visible at start) -->
+        <img id="envelope-body-img"
+             src="assets/images/envelope-body.jpg"
+             alt="" aria-hidden="true">
+        <!-- Open envelope (fades in on click, stacked on top) -->
+        <img id="envelope-open-img"
+             src="assets/images/envelope-open.jpg"
+             alt="" aria-hidden="true">
+        <!-- Wax seal overlay — click trigger -->
+        <img id="wax-seal-img"
+             src="assets/images/wax-seal.png"
+             role="button"
+             tabindex="0"
+             data-i18n-aria="aria.seal"
+             aria-label="Toca para abrir la invitación"
+             alt="">
+        <!-- Letter card rises during animation -->
+        <div id="letter-card" aria-hidden="true">
+          <div class="letter-content">
+            <span class="letter-ornament">✦</span>
+            <p data-i18n="letter.text">Tenemos el honor de invitarte</p>
+          </div>
         </div>
       </div>
     </div>
-
     <p id="seal-hint" aria-hidden="true" data-i18n="seal.hint">Toca el sello para abrir</p>
   </div>
   <!-- END ENVELOPE SCREEN -->
