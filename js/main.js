@@ -24,6 +24,17 @@
     // ── Gallery lightbox ────────────────────────────────────
     initLightbox();
 
+    // ── Registry email reveal ────────────────────────────────
+    var registryBtn = document.getElementById('registry-btn');
+    if (registryBtn) {
+      registryBtn.addEventListener('click', function () {
+        var panel = document.getElementById('registry-email-panel');
+        var isHidden = panel.hidden;
+        panel.hidden = !isHidden;
+        registryBtn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+      });
+    }
+
     // ── Smooth scroll for internal links ────────────────────
     document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
       anchor.addEventListener('click', function (e) {

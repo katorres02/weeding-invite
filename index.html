@@ -230,15 +230,19 @@
         <p data-i18n="registry.text">
           Tu presencia es nuestro mejor regalo. Si deseas obsequiarnos algo, hemos preparado una mesa de regalos para facilitar tu elección.
         </p>
-        <a href="GIFT_REGISTRY_URL"
-           class="cta-button"
-           target="_blank"
-           rel="noopener"
-           data-i18n="registry.btn"
-           data-i18n-aria="aria.registry.btn"
-           aria-label="Ver mesa de regalos (abre en nueva pestaña)">
-          Ver Mesa de Regalos
-        </a>
+        <button id="registry-btn"
+                class="cta-button"
+                data-i18n="registry.btn"
+                data-i18n-aria="aria.registry.btn"
+                aria-expanded="false"
+                aria-controls="registry-email-panel">
+          Ver Cómo Enviar
+        </button>
+        <div id="registry-email-panel" hidden>
+          <p class="registry-email-label" data-i18n="registry.email.label">Envía tu Interac e-Transfer a:</p>
+          <strong class="registry-email">carlosandrestorres28@gmail.com</strong>
+          <p class="registry-email-note" data-i18n="registry.email.note">El depósito es automático, no necesitas hacer nada más.</p>
+        </div>
       </div>
     </section>
 
