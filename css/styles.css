@@ -117,18 +117,31 @@ h3 {
   opacity: 0.7;
 }
 
-/* Alternating section backgrounds */
-#dress-code {
-  background-color: var(--color-blush);
-}
-
+/* Section backgrounds — alternating light / dark / sage */
 #countdown-section {
-  background-color: var(--color-text);
+  background-color: var(--color-text);  /* dark */
   color: var(--color-bg);
 }
 
+#event-details {
+  background-color: var(--color-bg);    /* ivory */
+}
+
+#gallery {
+  background-color: var(--color-text);  /* dark — photos pop */
+  color: var(--color-bg);
+}
+
+#dress-code {
+  background-color: var(--color-blush); /* sage */
+}
+
+#gift-registry {
+  background-color: var(--color-bg);    /* ivory */
+}
+
 #rsvp {
-  background-color: var(--color-text);
+  background-color: var(--color-text);  /* dark */
   color: var(--color-bg);
 }
 
@@ -341,6 +354,9 @@ h3 {
 /* ============================================================
    GALLERY
    ============================================================ */
+#gallery h2 {
+  color: var(--color-bg);
+}
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
