@@ -42,6 +42,7 @@
       'aria.dresscode.palette': 'Paleta de colores sugerida para invitados',
       'aria.registry.btn':      'Ver cómo enviar un Interac e-Transfer',
       'aria.rsvp.btn':          'Abrir formulario de confirmación de asistencia (abre en nueva pestaña)',
+      'rsvp.form.url':          'https://docs.google.com/forms/d/e/1FAIpQLSerOgeuJQAXjeVZoMo9PsUaDIueM6h0nCuxP00hHZNjG1zd4A/viewform?usp=dialog',
     },
     en: {
       'seal.hint':              'Click the seal to open',
@@ -83,6 +84,7 @@
       'aria.dresscode.palette': 'Suggested color palette for guests',
       'aria.registry.btn':      'View how to send an Interac e-Transfer',
       'aria.rsvp.btn':          'Open RSVP form (opens in new tab)',
+      'rsvp.form.url':          'https://docs.google.com/forms/d/e/1FAIpQLSe8LBGasTIif3Onv_F14OkswgJCIN-LXUv8NDyKxSM02tu2Vg/viewform?usp=dialog',
     }
   };
 
@@ -100,6 +102,10 @@
 
     document.querySelectorAll('[data-i18n-aria]').forEach(function (el) {
       el.setAttribute('aria-label', t(el.dataset.i18nAria));
+    });
+
+    document.querySelectorAll('[data-i18n-href]').forEach(function (el) {
+      el.setAttribute('href', t(el.dataset.i18nHref));
     });
 
     document.documentElement.lang = currentLang;
